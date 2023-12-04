@@ -4,8 +4,8 @@
 from gpt_parser import gptParser
 from time import sleep
 
-dirver = gptParser.get_driver()
-gpt = gptParser(driver=dirver)
+driver = gptParser.get_driver()
+gpt = gptParser(driver=driver)
 
 gpt.auto_login()
 sleep(5)
