@@ -2,17 +2,17 @@ import subprocess
 import os
 
 # Set the working directory to ModelSim's directory
-modelsim_dir = 'D:/Modelsim/modelsim-win64-10.4-se/win64'
+modelsim_dir = 'path/to/your/modelsim'
 os.chdir(modelsim_dir)
 
 # Optionally, set MODELSIM environment variable
 os.environ['MODELSIM'] = modelsim_dir
 
 # Define the absolute paths
-design_file = "D:/ASIC/Debugger/Verilog/Multiplier/design.v"
-testbench_file = "D:/ASIC/Debugger/Verilog/Multiplier/tb.v"
-compile_report_file = "D:/ASIC/Debugger/Verilog/Multiplier/compile_report.txt"
-simulation_report_file = "D:/ASIC/Debugger/Verilog/Multiplier/simulation_report.txt"
+design_file = "path/to/your/design.v"
+testbench_file = "path/to/your/tb.v"
+compile_report_file = "path/to/your/compile_report.txt"
+simulation_report_file = "path/to/your/simulation_report.txt"
 
 # ModelSim compile command with absolute paths
 compile_command = f"vlog {design_file} {testbench_file}"
