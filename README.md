@@ -1,6 +1,5 @@
 # Verilog-Auto-Debug
-Verilog auto debug with Gpts
-
+<p align="right">**Verilog auto debug with Gpts**</p>
 sim.bat执行仿真，仿真.do文件为wave.do
 
 upload.py执行修改markdown和上传操作
