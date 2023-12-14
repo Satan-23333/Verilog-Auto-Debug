@@ -1,15 +1,50 @@
 import os
+import re
 import win32gui
 import win32con
 import time
 import random
 from time import sleep
+import subprocess
 from selenium.webdriver.remote.webdriver import By
 import undetected_chromedriver as uc
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import ElementClickInterceptedException, NoSuchElementException, TimeoutException
+import tkinter
+import tkinter.filedialog
+
+
+def rename_file(file_dir:str,old_name:str,new_name:str) -> None:
+    os.chdir(file_dir) #更改当前路径
+    #filelist = os.listdir(file_dir)  # 该文件夹下所有的文件（包括文件夹）
+    os.rename(old_name,new_name) #重命名
+
+def auto_modelsim(modelsim_dir:str,design_file:str,testbench_file:str,compile_report_file:str,simulation_report_file:str) -> None:
+    os.chdir(modelsim_dir)
+    os.environ['MODELSIM'] = modelsim_dir
+    compile_command = f"vlog {design_file} {testbench_file}"
+    # Run the compile command and write output to compile report
+    with open(compile_report_file, "w") as report_file:
+        subprocess.run(compile_command, shell=True, stdout=report_file, stderr=subprocess.STDOUT)
+
+    # # ModelSim simulation command
+    # simulate_command = "vsim -c -do \"run -all\" tb"
+
+    # # Run the simulation command and write output to simulation report
+    # with open(simulation_report_file, "w") as report_file:
+    #     subprocess.run(simulate_command, shell=True, stdout=report_file, stderr=subprocess.STDOUT)
+def error_num(report_file:str)-> int :
+    file=open(report_file,'r')     
+    file_contents=file.readlines()   #按行读取全部内容
+
+    for content in file_contents:     #逐行读取
+        if  "Errors: " in content:     
+            result =int(re.findall(".*Errors: (.*),.*",content)[0])
+    return result
+
+
 
 class gptParser:
 
@@ -45,11 +80,11 @@ class gptParser:
         except:
             return None
         
-    def auto_login(self) -> None:
+    def auto_login(self,username:str,password:str) -> None:
         self.driver.find_element(By.CSS_SELECTOR, "[data-testid='login-button']").click()
         self.driver.implicitly_wait(10)
         username_field=self.driver.find_element(By.NAME, "username")
-        username_field.send_keys("账号")#账号
+        username_field.send_keys(username)#账号
         self.driver.find_element(By.CLASS_NAME,"_button-login-id").click()
         # continue_button=self.driver.find_element(By.NAME,"action")
         # continue_button.click()
@@ -57,7 +92,7 @@ class gptParser:
 
         self.driver.implicitly_wait(10)
         password_field=self.driver.find_element(By.NAME, "password")
-        password_field.send_keys("密码")#密码
+        password_field.send_keys(password)#密码
         self.driver.implicitly_wait(10)
         self.driver.find_element(By.CLASS_NAME,"_button-login-password").click()
         # continue_button=self.driver.find_element(By.NAME,"action")
@@ -65,23 +100,23 @@ class gptParser:
         #self.driver.find_element_by_xpath("//div[1]/main/section/div/div/div/form/div[3]/button")
 
 
-    def set_gpt_model(self, model_version: str) -> None:
-        """Set GPT model.
+    # def set_gpt_model(self, model_version: str) -> None:
+    #     """Set GPT model.
 
-        Args:
-            model_version (str): GPT model version (GPT-3.5 or GPT-4)
-        """
-        if model_version not in ["GPT-3.5", "GPT-4"]:
-            msg = "model_version must be GPT-3.5 or GPT-4"
-            raise ValueError(msg)
-        self.driver.find_element(By.XPATH, f"//button[contains(., '{model_version}')]").click()
+    #     Args:
+    #         model_version (str): GPT model version (GPT-3.5 or GPT-4)
+    #     """
+    #     if model_version not in ["GPT-3.5", "GPT-4"]:
+    #         msg = "model_version must be GPT-3.5 or GPT-4"
+    #         raise ValueError(msg)
+    #     self.driver.find_element(By.XPATH, f"//button[contains(., '{model_version}')]").click()
 
     def set_gpts(self) -> None:
         self.driver.find_element(By.LINK_TEXT,"Verilog Auto Debug").click()
 
     def upload_files(self,docs:str) -> None:
         self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Attach files']").click()    
-        time.sleep(random.uniform(1, 5))
+        sleep(3)
         # upload = self.driver.find_element_by_id('file')
         # upload.send_keys('d:\\test\\multiply.v''d:\\test\\testbench.v''d:\\test\\vcompile.txt')  # send_keys
        
@@ -97,7 +132,25 @@ class gptParser:
 
         sleep(10)
         self.driver.find_element(By.CSS_SELECTOR, "[data-testid='send-button']").click()
+
+    def download_files(self) -> None:
+        self.driver.find_elements(By.CSS_SELECTOR, "[target='_new']")[0].click()
+        time.sleep(random.uniform(1, 5))
+        self.driver.find_elements(By.CSS_SELECTOR, "[target='_new']")[1].click()  
         
+        # tkinter.filedialog.asksaveasfilename(title='Python tkinter',
+        #                                      initialdir=r'D:\\test',
+        #                                      initialfile='vcompile.txt')
+        
+        # dialog = win32gui.FindWindow('#32770', '另存为')
+        # # ComboBoxEx32 = win32gui.FindWindowEx(dialog, 0, 'ComboBoxEx32', None)
+        # # ComboBox = win32gui.FindWindowEx(ComboBoxEx32, 0, 'ComboBox', None)
+        # # Edit = win32gui.FindWindowEx(ComboBox, 0, 'Edit', None)  # 上面三句依次寻找对象，直到找到输入框Edit对象的句柄
+        # button = win32gui.FindWindowEx(dialog, 0, 'Button', None)  # 确定按钮Button
+
+        # # win32gui.SendMessage(Edit, win32con.WM_SETTEXT, None, doc_address)  # 往输入框输入绝对地址
+        # win32gui.SendMessage(dialog, win32con.WM_COMMAND, 1, button)  # 按button
+
 
     def send_prompt(self, prompt: str) -> None:
         """Send prompt.
@@ -110,7 +163,7 @@ class gptParser:
         textarea.clear()
         textarea.send_keys(prompt)
         time.sleep(random.uniform(1, 5))
-        self.driver.find_element(By.CSS_SELECTOR, "button.absolute").click()
+        self.driver.find_element(By.CSS_SELECTOR, "[data-testid='send-button']").click()
 
     # temporarily abolishing
     # def get_user_prompt(self):
