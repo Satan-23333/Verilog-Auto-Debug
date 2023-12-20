@@ -15,12 +15,14 @@ from selenium.common.exceptions import ElementClickInterceptedException, NoSuchE
 import tkinter
 import tkinter.filedialog
 
-
-def rename_file(file_dir:str,old_name:str,new_name:str) -> None:
+#修改文件名称
+def rename_file(file_dir:str,old_name:str,new_name:str) -> None:  
     os.chdir(file_dir) #更改当前路径
     #filelist = os.listdir(file_dir)  # 该文件夹下所有的文件（包括文件夹）
     os.rename(old_name,new_name) #重命名
 
+
+#调用modelsim编译，但仿真有问题，需要改
 def auto_modelsim(modelsim_dir:str,design_file:str,testbench_file:str,compile_report_file:str,simulation_report_file:str) -> None:
     os.chdir(modelsim_dir)
     os.environ['MODELSIM'] = modelsim_dir
@@ -35,6 +37,9 @@ def auto_modelsim(modelsim_dir:str,design_file:str,testbench_file:str,compile_re
     # # Run the simulation command and write output to simulation report
     # with open(simulation_report_file, "w") as report_file:
     #     subprocess.run(simulate_command, shell=True, stdout=report_file, stderr=subprocess.STDOUT)
+
+
+#获取报告中Errors数目，
 def error_num(report_file:str)-> int :
     file=open(report_file,'r')     
     file_contents=file.readlines()   #按行读取全部内容
@@ -79,7 +84,9 @@ class gptParser:
             return response
         except:
             return None
-        
+
+
+    #自动登录    
     def auto_login(self,username:str,password:str) -> None:
         self.driver.find_element(By.CSS_SELECTOR, "[data-testid='login-button']").click()
         self.driver.implicitly_wait(10)
@@ -95,25 +102,12 @@ class gptParser:
         password_field.send_keys(password)#密码
         self.driver.implicitly_wait(10)
         self.driver.find_element(By.CLASS_NAME,"_button-login-password").click()
-        # continue_button=self.driver.find_element(By.NAME,"action")
-        # continue_button.click()
-        #self.driver.find_element_by_xpath("//div[1]/main/section/div/div/div/form/div[3]/button")
 
-
-    # def set_gpt_model(self, model_version: str) -> None:
-    #     """Set GPT model.
-
-    #     Args:
-    #         model_version (str): GPT model version (GPT-3.5 or GPT-4)
-    #     """
-    #     if model_version not in ["GPT-3.5", "GPT-4"]:
-    #         msg = "model_version must be GPT-3.5 or GPT-4"
-    #         raise ValueError(msg)
-    #     self.driver.find_element(By.XPATH, f"//button[contains(., '{model_version}')]").click()
-
+    #选择gpts新建对话
     def set_gpts(self) -> None:
         self.driver.find_element(By.LINK_TEXT,"Verilog Auto Debug").click()
 
+    #上传文件
     def upload_files(self,docs:str) -> None:
         self.driver.find_element(By.CSS_SELECTOR, "[aria-label='Attach files']").click()    
         sleep(3)
@@ -151,7 +145,7 @@ class gptParser:
         # # win32gui.SendMessage(Edit, win32con.WM_SETTEXT, None, doc_address)  # 往输入框输入绝对地址
         # win32gui.SendMessage(dialog, win32con.WM_COMMAND, 1, button)  # 按button
 
-
+    #给gpt发消息
     def send_prompt(self, prompt: str) -> None:
         """Send prompt.
 
@@ -165,14 +159,8 @@ class gptParser:
         time.sleep(random.uniform(1, 5))
         self.driver.find_element(By.CSS_SELECTOR, "[data-testid='send-button']").click()
 
-    # temporarily abolishing
-    # def get_user_prompt(self):
-    #     user_elements = self.driver.find_elements(
-    #         By.XPATH,
-    #         '//div[contains(@class, "group w-full text-gray-800 dark:text-gray-100 border-b border-black/10 dark:border-gray-900/50 dark:bg-gray-800")]',
-    #     )
-    #     return [user_element.text for user_element in user_elements]
 
+    #获取gpt的输出内容
     def get_gpt_response(self, timeout: int = 60) -> list[str]:
         """Get GPT response.
 
@@ -206,30 +194,7 @@ class gptParser:
         )
         return [gpt_element.text for gpt_element in gpt_elements]
 
-    # def new_conversation(self) -> None:
-    #     """Create new conversation."""
-    #     try:
-    #         self.driver.find_element(By.LINK_TEXT, "New chat").click()
-    #     except ElementClickInterceptedException:
-    #         self.driver.find_element(By.LINK_TEXT, "Clear chat").click()
 
-    # def resume_conversation(self, chatid: str) -> None:
-    #     """Resume conversation.
-
-    #     Args:
-    #         chatid (str): chatid
-    #     """
-    #     resume_chat_page = gptParser.OPENAI_URL + f"/c/{chatid}"
-    #     self.driver.get(resume_chat_page)
-    #     time.sleep(1)
-    #     if self.driver.current_url != resume_chat_page:
-    #         msg = "Unable to load conversation page. Check if the chatid is correct."
-    #         raise ValueError(msg)
-
-
-    # def new_chat(self):
-    #     """Open a new chat"""
-    #     self.driver.find_element(By.XPATH, '//a[text()="New chat"]').click()
-
+    #退出程序
     def quit(self):
         self.driver.quit()
